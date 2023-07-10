@@ -38,7 +38,7 @@ The script uses a JSON configuration file (`config.json`) to specify the bot's s
 To run the bot, execute the following command:
 
 ```
-node bot.js
+node index.js
 ```
 
 The bot will connect to the Minecraft server using the provided IP address and username. Once connected, it will send a "hello" message in the chat. The bot will then start performing random movements at the specified interval.
