@@ -53,9 +53,6 @@ The script utilizes event handlers to perform specific actions:
 
 - **'time' event**: Triggered when the time in the Minecraft world changes. If the `"auto-night-skip"` configuration is set to `true` and it becomes nighttime (timeOfDay >= 13000), the bot will execute `/time set day` command to skip the night.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE). Feel free to modify and distribute it as per the terms of the license.
 
 ## Disclaimer
 
