@@ -1,74 +1,65 @@
-const mineflayer = require('mineflayer')
-const cmd = require('mineflayer-cmd').plugin
+const mineflayer = require('mineflayer');
+const cmd = require('mineflayer-cmd').plugin;
 const fs = require('fs');
-let rawdata = fs.readFileSync('config.json');
-let data = JSON.parse(rawdata);
-var lasttime = -1;
-var moving = 0;
-var connected = 0;
-var actions = [ 'forward', 'back', 'left', 'right']
-var lastaction;
-var pi = 3.14159;
-var moveinterval = 2; // 2 second movement interval
-var maxrandom = 5; // 0-5 seconds added to movement interval (randomly)
-var host = data["ip"];
-var username = data["name"]
-var nightskip = data["auto-night-skip"]
-var bot = mineflayer.createBot({
-  host: host,
-  username: username
-});
-function getRandomArbitrary(min, max) {
-       return Math.random() * (max - min) + min;
 
+const configData = fs.readFileSync('config.json');
+const config = JSON.parse(configData);
+
+const {
+  ip: host,
+  name: username,
+  'auto-night-skip': nightSkip,
+} = config;
+
+const actions = ['forward', 'back', 'left', 'right'];
+let lastAction;
+let lastTime = -1;
+let moving = false;
+let connected = false;
+
+const moveInterval = 2; // Movement interval in seconds
+const maxRandom = 5; // Random seconds added to movement interval
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
 }
 
-bot.loadPlugin(cmd)
-
-
-
-bot.on('login',function(){
-	console.log("Logged In")
-	bot.chat("hello");
+const bot = mineflayer.createBot({
+  host,
+  username,
 });
 
-bot.on('time', function(time) {
-	if(nightskip == "true"){
-	if(bot.time.timeOfDay >= 13000){
-	bot.chat('/time set day')
-	}}
-    if (connected <1) {
-        return;
-    }
-    if (lasttime<0) {
-        lasttime = bot.time.age;
-    } else {
-        var randomadd = Math.random() * maxrandom * 20;
-        var interval = moveinterval*20 + randomadd;
-        if (bot.time.age - lasttime > interval) {
-            if (moving == 1) {
-                bot.setControlState(lastaction,false);
-                moving = 0;
-                lasttime = bot.time.age;
-            } else {
-                var yaw = Math.random()*pi - (0.5*pi);
-                var pitch = Math.random()*pi - (0.5*pi);
-                bot.look(yaw,pitch,false);
-                lastaction = actions[Math.floor(Math.random() * actions.length)];
-                bot.setControlState(lastaction,true);
-                moving = 1;
-                lasttime = bot.time.age;
-                bot.activateItem();
-            }
-        }
-    }
+bot.loadPlugin(cmd);
+
+// Login event handler
+bot.on('login', function () {
+  console.log('Logged in');
+  bot.chat('hello');
 });
 
-bot.on('spawn',function() {
-    connected=1;
-});
+// Time event handler
+bot.on('time', async function (time) {
+  if (nightSkip === true && bot.time.timeOfDay >= 13000) {
+    await bot.chat('/time set day');
+  }
 
-bot.on('death',function() {
-    bot.emit("respawn")
-});
+  if (!connected) {
+    return;
+  }
 
+  if (lastTime < 0) {
+    lastTime = bot.time.age;
+  } else {
+    const randomAdd = Math.random() * maxRandom * 20;
+    const interval = moveInterval * 20 + randomAdd;
+    const timeElapsed = bot.time.age - lastTime;
+
+    if (timeElapsed > interval) {
+      if (moving) {
+        bot.setControlState(lastAction, false);
+        moving = false;
+        lastTime = bot.time.age;
+      } else {
+        const yaw = Math.random() * Math.PI - 0.5 * Math.PI;
+        const pitch = Math.random() * Math.PI - 0.5 * Math.PI;
+        bot.look
